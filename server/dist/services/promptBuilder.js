@@ -1,50 +1,38 @@
-import { IUser } from '../models/User'
-
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.buildWriterPrompt = exports.getPostType = exports.getHookType = void 0;
 const HOOK_TYPES = [
-  'bold_claim',
-  'personal_failure',
-  'controversial_stat',
-  'question',
-  'prediction',
-  'contrarian_take',
-  'story_open',
-  'listicle',
-]
-
+    'bold_claim',
+    'personal_failure',
+    'controversial_stat',
+    'question',
+    'prediction',
+    'contrarian_take',
+    'story_open',
+    'listicle',
+];
 const POST_TYPES = [
-  'story',
-  'insight',
-  'list',
-  'prediction',
-  'question',
-  'contrarian',
-]
-
-export const getHookType = (postCount: number): string => {
-  return HOOK_TYPES[postCount % HOOK_TYPES.length]
-}
-
-
-
-export const getPostType = (postCount: number): string => {
-  const day = new Date().getDay()
-  return POST_TYPES[day % POST_TYPES.length]
-}
-
-export const buildWriterPrompt = (
-  user: IUser,
-  avoidTopics: string[],
-  newsHeadline?: string,
-  postCount: number = 0,
-  creatorStyle?: any,
-  useCreatorStyle?: boolean,
-  requestedFormat?: string
-): string => {
-
-  // Creator style section
-let creatorSection = ''
-if (useCreatorStyle && creatorStyle) {
-  creatorSection = `
+    'story',
+    'insight',
+    'list',
+    'prediction',
+    'question',
+    'contrarian',
+];
+const getHookType = (postCount) => {
+    return HOOK_TYPES[postCount % HOOK_TYPES.length];
+};
+exports.getHookType = getHookType;
+const getPostType = (postCount) => {
+    const day = new Date().getDay();
+    return POST_TYPES[day % POST_TYPES.length];
+};
+exports.getPostType = getPostType;
+const buildWriterPrompt = (user, avoidTopics, newsHeadline, postCount = 0, creatorStyle, useCreatorStyle, requestedFormat) => {
+    // Creator style section
+    let creatorSection = '';
+    if (useCreatorStyle && creatorStyle) {
+        creatorSection = `
 CREATOR STYLE TO MATCH (keep the vibe, not the exact words):
 - Overall vibe: ${creatorStyle.summary}
 - Hook style: ${creatorStyle.hookStyle}
@@ -57,19 +45,17 @@ CREATOR STYLE TO MATCH (keep the vibe, not the exact words):
 - Example hooks in their style: ${creatorStyle.exampleHooks?.join(' | ')}
 
 IMPORTANT: Match their VIBE and STYLE — but write completely different content.
-`
-}
-  const hookType = getHookType(postCount)
-  const postType = requestedFormat || getPostType(postCount)
-  const avoid    = avoidTopics.length > 0
-    ? avoidTopics.join(', ')
-    : 'none yet'
-
-  const card = user.intelligenceCard as any
-  let intelligenceSection = ''
-
-  if (card && card.weeksCovered >= 1) {
-    intelligenceSection = `
+`;
+    }
+    const hookType = (0, exports.getHookType)(postCount);
+    const postType = requestedFormat || (0, exports.getPostType)(postCount);
+    const avoid = avoidTopics.length > 0
+        ? avoidTopics.join(', ')
+        : 'none yet';
+    const card = user.intelligenceCard;
+    let intelligenceSection = '';
+    if (card && card.weeksCovered >= 1) {
+        intelligenceSection = `
 PERFORMANCE INSIGHTS (${card.weeksCovered} weeks of data):
 - Voice: ${card.voice?.summary ?? ''}
 - Best hook types: ${card.whatWorks?.hookTypes?.join(', ') ?? ''} — USE THESE
@@ -79,10 +65,9 @@ PERFORMANCE INSIGHTS (${card.weeksCovered} weeks of data):
 - Avoid post types: ${card.whatFails?.postTypes?.join(', ') ?? ''}
 - Best CTA style: ${card.whatWorks?.bestCTAStyle ?? ''}
 - Audience insight: ${card.audienceInsight ?? ''}
-`
-  }
-
-  return `You are a LinkedIn content expert.
+`;
+    }
+    return `You are a LinkedIn content expert.
 Write a HIGH-ENGAGEMENT LinkedIn post.
 
 User details:
@@ -95,9 +80,8 @@ ${creatorSection}
 - Target: global ${user.niche} professionals
 ${intelligenceSection}
 ${newsHeadline
-  ? `Base the post around this trending news: "${newsHeadline}"`
-  : `Write about a trending topic in ${user.niche}`
-}
+        ? `Base the post around this trending news: "${newsHeadline}"`
+        : `Write about a trending topic in ${user.niche}`}
 
 Hook type: ${hookType}
 Post type: ${postType}
@@ -141,5 +125,6 @@ STRICT:
 - Under 400 words
 - Under 3000 characters
 - No labels like [HOOK]
-- Output post directly — nothing else`
-}
+- Output post directly — nothing else`;
+};
+exports.buildWriterPrompt = buildWriterPrompt;

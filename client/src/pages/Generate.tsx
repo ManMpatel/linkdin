@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import api from '../api/axios'
-import Navbar from '../components/Navbar'
 import EngagementModal from '../components/EngagementModal'
 import ImageCanvas from '../components/ImageCanvas/index'
 
@@ -36,6 +35,7 @@ export default function Generate() {
   const [lastScore, setLastScore]           = useState<number | null>(null)
   const [useCreatorStyle, setUseCreatorStyle] = useState(false)
   const [hasCreatorStyle, setHasCreatorStyle] = useState(false)
+  const [postFormat, setPostFormat] = useState('auto')
 
 
   // Check if creator style exists on load:
@@ -58,9 +58,10 @@ export default function Generate() {
         newsDescription: newsState?.newsDescription,
         wantsImage,
         useCreatorStyle,
+        postFormat:      postFormat !== 'auto' ? postFormat : undefined,
       })
       if (data.success) setPost(data.data)
-    } catch (err: any) {
+    } catch {
       setError('Generation failed — check your API key')
     } finally {
       setLoading(false)
@@ -124,6 +125,24 @@ export default function Generate() {
                 onKeyDown={e => e.key === 'Enter' && generate()}
                 placeholder={`e.g. How AI is changing ${user?.niche ?? 'your industry'}`}
               />
+            </div>
+
+            <div>
+              <label className="field-label">Post Vibe / Format</label>
+              <select
+                className="input-field"
+                value={postFormat}
+                onChange={e => setPostFormat(e.target.value)}
+                style={{ padding: '10px', height: '42px' }}
+              >
+                <option value="auto">Auto (Let AI decide)</option>
+                <option value="story">Personal Story / Anecdote</option>
+                <option value="unpopular_opinion">Unpopular Opinion / Hot Take</option>
+                <option value="behind_the_scenes">Behind the Scenes / Process</option>
+                <option value="mistake">Mistake / Lesson Learned</option>
+                <option value="rant">Passionate Rant</option>
+                <option value="insight">Deep Insight / Framework</option>
+              </select>
             </div>
 
             {/* Toggles */}

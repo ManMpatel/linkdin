@@ -24,7 +24,7 @@ router.post('/', authMiddleware, async (req: Request, res: Response) => {
       createdAt: { $gte: sixtyDaysAgo },
     }).select('topicTags')
     const avoidTopics = recentPosts.flatMap(p => p.topicTags).filter(Boolean)
-    const { topic, newsTitle, newsDescription, wantsImage, useCreatorStyle } = req.body
+    const { topic, newsTitle, newsDescription, wantsImage, useCreatorStyle, postFormat } = req.body
 
     const creatorDoc   = await Creator.findOne({ userId: user._id })
     const creatorStyle = creatorDoc?.styleFingerprint ?? null
@@ -43,7 +43,8 @@ router.post('/', authMiddleware, async (req: Request, res: Response) => {
       newsHeadline,
       postCount,
       creatorStyle,
-      useCreatorStyle === true && !!creatorStyle
+      useCreatorStyle === true && !!creatorStyle,
+      postFormat
     )    
     const content   = await generatePost(prompt)
     const wordCount = content.split(/\s+/).length

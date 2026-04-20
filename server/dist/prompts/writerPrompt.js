@@ -1,49 +1,36 @@
-import { IUser } from '../models/User'
-
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.buildWriterPrompt = exports.getPostType = exports.getHookType = void 0;
 const HOOK_TYPES = [
-  'bold_claim', 'personal_failure', 'controversial_stat',
-  'question', 'prediction', 'contrarian_take', 'story_open', 'listicle',
-]
-
+    'bold_claim', 'personal_failure', 'controversial_stat',
+    'question', 'prediction', 'contrarian_take', 'story_open', 'listicle',
+];
 const POST_TYPES = [
-  'story', 'insight', 'list', 'prediction', 'question', 'contrarian',
-]
-
-export const getHookType = (postCount: number): string =>
-  HOOK_TYPES[postCount % HOOK_TYPES.length]
-
-export const getPostType = (postCount: number): string =>
-  POST_TYPES[new Date().getDay() % POST_TYPES.length]
-
-export const buildWriterPrompt = (
-  user: IUser,
-  avoidTopics: string[],
-  newsHeadline?: string,
-  postCount: number = 0,
-  creatorStyle?: any,
-  useCreatorStyle?: boolean,
-  requestedFormat?: string
-): string => {
-  const hookType = getHookType(postCount)
-  const postType = requestedFormat || getPostType(postCount)
-  const avoid    = avoidTopics.length > 0 ? avoidTopics.join(', ') : 'none yet'
-
-  const card = user.intelligenceCard as any
-  let intelligenceSection = ''
-  if (card && card.weeksCovered >= 1) {
-    intelligenceSection = `
+    'story', 'insight', 'list', 'prediction', 'question', 'contrarian',
+];
+const getHookType = (postCount) => HOOK_TYPES[postCount % HOOK_TYPES.length];
+exports.getHookType = getHookType;
+const getPostType = (postCount) => POST_TYPES[new Date().getDay() % POST_TYPES.length];
+exports.getPostType = getPostType;
+const buildWriterPrompt = (user, avoidTopics, newsHeadline, postCount = 0, creatorStyle, useCreatorStyle, requestedFormat) => {
+    const hookType = (0, exports.getHookType)(postCount);
+    const postType = requestedFormat || (0, exports.getPostType)(postCount);
+    const avoid = avoidTopics.length > 0 ? avoidTopics.join(', ') : 'none yet';
+    const card = user.intelligenceCard;
+    let intelligenceSection = '';
+    if (card && card.weeksCovered >= 1) {
+        intelligenceSection = `
 PERFORMANCE INSIGHTS (${card.weeksCovered} weeks of data — follow closely):
 - Best hooks: ${card.whatWorks?.hookTypes?.join(', ')}
 - Best formats: ${card.whatWorks?.postTypes?.join(', ')}
 - Top hashtags: ${card.whatWorks?.topHashtags?.join(' ')}
 - Best CTA: ${card.whatWorks?.bestCTAStyle}
 - Audience insight: ${card.audienceInsight}
-`
-  }
-
-  let creatorSection = ''
-  if (useCreatorStyle && creatorStyle) {
-    creatorSection = `
+`;
+    }
+    let creatorSection = '';
+    if (useCreatorStyle && creatorStyle) {
+        creatorSection = `
 CREATOR STYLE TO MATCH (keep the vibe, not the exact words):
 - Summary: ${creatorStyle.summary}
 - Hook style: ${creatorStyle.hookStyle}
@@ -52,26 +39,23 @@ CREATOR STYLE TO MATCH (keep the vibe, not the exact words):
 - Vocabulary: ${creatorStyle.vocabularyLevel}
 - Example hooks: ${creatorStyle.exampleHooks?.join(' | ')}
 Match their VIBE — completely different content.
-`
-  }
-
-  // Trending topic examples by niche
-  const nicheTrends: Record<string, string> = {
-    AI:         'AI replacing jobs, ChatGPT vs humans, prompt engineering, AI startups failing, future of work with AI',
-    Tech:       'Google layoffs, big tech vs startups, coding with AI, developer skills 2026, remote work in tech',
-    Business:   'startup failures, CEO mindset, how companies grow fast, business lessons from failure, leadership mistakes',
-    Fitness:    'fitness myths, workout habits of successful people, mental health and exercise, discipline vs motivation',
-    Finance:    'how the rich invest, financial mistakes in your 20s, passive income reality, stock market psychology',
-    Marketing:  'viral content secrets, why ads fail, organic vs paid growth, personal brand vs company brand',
-    Leadership: 'bad manager habits, how great leaders think, team culture secrets, hiring vs firing decisions',
-    Startup:    'why startups fail, fundraising reality, building in public, MVP lessons, founder mental health',
-    Career:     'how to get promoted faster, salary negotiation, career pivots, skills that pay the most',
-  }
-
-  const trendingExamples = nicheTrends[user.niche] ??
-    'industry trends, lessons from failure, controversial opinions, data-backed insights'
-
-  return `You are a LinkedIn content expert writing for a real person.
+`;
+    }
+    // Trending topic examples by niche
+    const nicheTrends = {
+        AI: 'AI replacing jobs, ChatGPT vs humans, prompt engineering, AI startups failing, future of work with AI',
+        Tech: 'Google layoffs, big tech vs startups, coding with AI, developer skills 2026, remote work in tech',
+        Business: 'startup failures, CEO mindset, how companies grow fast, business lessons from failure, leadership mistakes',
+        Fitness: 'fitness myths, workout habits of successful people, mental health and exercise, discipline vs motivation',
+        Finance: 'how the rich invest, financial mistakes in your 20s, passive income reality, stock market psychology',
+        Marketing: 'viral content secrets, why ads fail, organic vs paid growth, personal brand vs company brand',
+        Leadership: 'bad manager habits, how great leaders think, team culture secrets, hiring vs firing decisions',
+        Startup: 'why startups fail, fundraising reality, building in public, MVP lessons, founder mental health',
+        Career: 'how to get promoted faster, salary negotiation, career pivots, skills that pay the most',
+    };
+    const trendingExamples = nicheTrends[user.niche] ??
+        'industry trends, lessons from failure, controversial opinions, data-backed insights';
+    return `You are a LinkedIn content expert writing for a real person.
 
 USER PROFILE:
 - Niche: ${user.niche}
@@ -82,12 +66,11 @@ ${intelligenceSection}
 ${creatorSection}
 
 ${newsHeadline
-  ? `TODAY'S NEWS ANGLE: "${newsHeadline}"
+        ? `TODAY'S NEWS ANGLE: "${newsHeadline}"
 Write a post that connects this news to something real and useful for the reader.`
-  : `TRENDING TOPICS IN ${user.niche.toUpperCase()} right now:
+        : `TRENDING TOPICS IN ${user.niche.toUpperCase()} right now:
 ${trendingExamples}
-Pick the most relevant and write about it with a fresh angle.`
-}
+Pick the most relevant and write about it with a fresh angle.`}
 
 Hook type today: ${hookType}
 Post format today: ${postType}
@@ -131,5 +114,6 @@ STRICT LIMITS:
 - Under 3000 characters
 - No labels like [HOOK] or [CONTENT]
 - No asterisks or markdown formatting
-- Output the post directly — nothing else`
-}
+- Output the post directly — nothing else`;
+};
+exports.buildWriterPrompt = buildWriterPrompt;
